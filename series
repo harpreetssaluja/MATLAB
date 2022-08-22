@@ -1,0 +1,8 @@
+function t = theSeries(a, b)
+if a >= 2 && b > 1 && b <= 12
+    n = b:12; 
+    t = sum(((a.^b) ./ (b.^log(a-1))) + (a.*b))
+else
+    t = NaN; 
+end
+end
