@@ -1,0 +1,24 @@
+function nd = days(mo, da, leap)
+
+%setting up the counter for the number of days
+count = 0; 
+
+%For loop running from January until one month before the input month
+for i = 1:mo - 1
+    switch i
+       case 2
+            n = 28 + leap;  % setting february to be 29 days if its a leap year
+        case {1, 3, 5, 7, 8, 10, 12} 
+            n = 31;  %setting jan, march, may, july, august, oct, & dec to 31 days
+       case {4, 6, 9, 11} 
+            n = 30; %setting april, june, sept, & nov to 30 days
+    end
+    
+    %summing the number of days that are passing in each month
+    count = count + n; 
+end
+
+%Adding the input days to the days from the for loop
+nd = count + da; 
+
+end
