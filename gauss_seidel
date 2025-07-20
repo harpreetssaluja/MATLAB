@@ -1,0 +1,11 @@
+function x = gauss_seidel(A, b, xold)
+es = .05;
+ea = 1;
+    while es > ea
+        for j = 1:size(A,1)
+            x(j) = (b(j) - sum(A(j,:)'.*xold) + A(j,j)*x(j))/A(j,j);
+            ea = abs((x(j) - xold)/x(j));
+            xold = x(j);
+        end
+    end
+end
