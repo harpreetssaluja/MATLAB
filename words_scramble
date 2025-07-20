@@ -1,0 +1,8 @@
+function out = wordscramble(x)
+n = 0
+    for i = 1:length(x)
+        n = n+1
+        out(n) = x(randi[1,length(x)])
+        x = x(regexp(s,'['))
+    end
+end
