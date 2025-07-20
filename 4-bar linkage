@@ -1,0 +1,119 @@
+clc; 
+
+%knowns: 
+l1 = 18; 
+l2 = 6; 
+l3 = 12;
+l4 = 15; 
+l5 = 5; 
+
+%preallocate
+t2 = [0:1:360]; 
+t3a = zeros(1, length(t2)); 
+t4a = zeros(1, length(t2)); 
+xp = zeros(1, length(t2));
+yp = zeros(1, length(t2));
+xq = zeros(1, length(t2));
+yq = zeros(1, length(t2));
+d = zeros(1, length(t2));
+av  = zeros(1, length(t2));
+
+%for loop
+for i = 1 : length(t2)
+
+    %initial guess
+    t3 = 90;
+    t4 = 180;
+
+    %f1 anf f2 loop closure equations: 
+    f1 = @(t3, t4) -l1 + (l2 * cosd(t2(i))) + (l3*cosd(t3)) - (l4*cosd(t4)); 
+    f2 = @(t3, t4) l5+ (l2 * sind(t2(i))) + (l3 * sind(t3)) - (l4 * sind(t4)); 
+
+    %Preallocate h an k
+    h = 1; 
+    k = 1; 
+
+    while abs(h) > 0.001 || abs(k) > 0.001
+
+        r1 = -f1(t3, t4); 
+        r2 = -f2(t3, t4); 
+
+        A = l3*l4*sind(t3-t4); 
+        h = -l4/A * ((r1*cosd(t4)) + (r2*sind(t4)));
+        k = -l3/A * ((r1*cosd(t3)) + (r2*sind(t3)));
+
+        %update guesses
+        t3 = t3 + h;
+        t4 = t4 + k;
+    end 
+
+    %storing my results
+    t3a(i) = t3; 
+    t4a(i) = t4; 
+end 
+
+for i = 1:length(t2)
+
+    xp(i) = (l2*cosd(t2(i))) + (l5*cosd(90)) + (l3*cosd(t3a(i))); 
+    yp(i) = l5 + (l2*sind(t2(i))) + (l5*sind(90)) - (l3*sind(t3a(i))); 
+
+end  
+
+for i = 1:length(t2)
+    xq(i) = (l2*cosd(t2(i))) + (l3*cosd(t3a(i))) - (l4*cosd(pi-t4a(i))); 
+    yq(i) = l5 + (l2*sind(t2(i))) + (l3*sind(t3a(i))) + (l4*sind(pi-t4a(i))); 
+end
+
+for i = 1: length(t2)
+    d(i) = sqrt((xq(i)-xp(i))^2+(yq(i)-yp(i))^2);
+end
+
+for i = 1:length (t2)
+    av(i) = 100*(xq(i)/yq(i))*(xp(i)/yp(i)); 
+end 
+
+for i = 1:length(t2)
+    tv(i) = 60*(yq(i)/xq(i))*(yp(i)/xp(i)); 
+end
+
+figure (1)
+hold on
+grid on
+xlabel ('Theta 2')
+ylabel ('Theta 4')
+title ('part a: Theta 2 vs. Theta 4')
+plot(t2, t4a)
+hold off
+
+figure (2) 
+hold on 
+grid on
+xlabel ('x-direction distance (cm)')
+ylabel ('y-direction distance (cm)')
+title ('part b: Path of point P for 1 revolution of crank')
+plot (xp, yp); 
+hold off; 
+
+hold on
+grid on
+xlabel ('theta 2')
+ylabel ('Distance between p and q')
+title ('part c: distance between P and q for every angle of theta  2')
+plot (t2, d)
+hold off
+
+hold on; 
+grid on;
+xlabel ('theta 4')
+ylabel ('Rocker Angular Velocity')
+title ('part d: angular velocity of long rocker link vs. theta 4')
+plot (t4a, av); 
+hold off; 
+
+hold on; 
+grid on;
+xlabel ('theta 2')
+ylabel ('Velocity of point P')
+title ('part e: translational velocity of point P vs. theta 2')
+plot (t4a, av); 
+
