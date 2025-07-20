@@ -1,0 +1,100 @@
+clc; 
+
+%variables
+E = 210e9; %Pa
+A = 19.5e-4; %m^2
+
+%Node coordinates for nodes 1-4
+node = [0,0; 0,4; -3, 4; -6, 0]; 
+
+%all 5 elements
+element = [1, 2; 2, 3; 3, 1; 1, 4; 4, 3]; 
+
+% 8 x 8 global matrix
+K = zeros (8, 8); 
+
+% Running for all 5 elements
+x1 = [node(1, 1); node(2, 1); node(3, 1); node(1, 1); node(4, 1)];
+y1 = [node(1, 2); node(2, 2); node(3, 2); node(1, 2); node(4, 2)];
+y2 = [node(2, 2); node(3, 2); node(1, 2); node(4, 2); node(3, 2)];
+x2 = [node(2, 1); node(3, 1); node(1, 1); node(4, 1); node(3, 1)];
+
+for i = 1:5
+    % Calculate length, c, and s based on the element positions
+    L = sqrt((x2(i) - x1(i))^2 + (y2(i) - y1(i))^2);
+    c = (x2(i)-x1(i))/L;
+    s = (y2(i)-y1(i))/L;
+    
+   %Based on stiffness matrix equation from book 
+    Ke = (A * E)/L * [c^2, c * s, -c^2, -c * s; c * s, s^2, -c * s, -s^2; -c^2, -c * s, c^2, c * s; -c * s, -s^2, c * s, s^2]; 
+
+    % Kans(i) = Ke; 
+
+    disp ('Element Stiffness for element:');
+    disp (i);  
+    disp (Ke)
+
+    % value of position in element matrix
+    m = element(i, 1);
+    n = element (i , 2);
+
+
+    KR = zeros(8, 8); 
+    %Organize the element stiffness matrix in global matrix. Organization
+    %of rows and columns dependent on organization of elements from the
+    %element matrix.
+    KR([2 * m - 1, 2 * m, 2 * n - 1, 2 * n], [2 * m - 1, 2 * m, 2 * n - 1, 2 * n]) = Ke;
+    
+    %Summing to the global matrix
+    K = K + KR; 
+end
+disp ('Global stiffness matrix:')
+disp (K);
+
+% Reduced stiffness matrix
+BC = [3, 4, 7, 8];
+
+K(BC, :) = [];
+K(:, BC) = [];
+
+% Force vector
+F = zeros(8, 1);
+F(1) = 40000;
+F(6) = -100000;
+F(BC) = [];
+
+% Displacement vector
+BC = [BC, 0];
+dp = K \ F;
+
+D = zeros(1, 8);
+num = 1;
+
+%For every displacement, if 
+for i = 1:length(dp)
+    if i ~= BC(1)
+        D(i) = dp(num);
+        num = num + 1;
+    else
+        D(i) = 0;
+        BC(1) = []; 
+    end
+end
+
+
+for i = 1: 4
+    nodenew(i, 1) = node(i, 2) + D(2*i);
+    nodenew(i, 2) = node(i, 1) + D(2*i-1);
+end
+
+xo = node(element(:, 1), 1); 
+yo = node(element(:, 1), 2); 
+
+xdef = nodenew(element(:, 1), 1); 
+ydef = nodenew(element(:, 1), 2); 
+
+hold on
+plot (xo, yo); 
+plot (xdef, ydef)
+hold off
+
