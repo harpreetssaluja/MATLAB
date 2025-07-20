@@ -1,0 +1,51 @@
+clc; 
+
+% Both functions
+func = @ (x) x.^2;
+gunc = @  (x) cos(pi*x); 
+
+%Sample sizes
+n = 1:1000;
+
+%Create solution vectors
+u1 = []; u2 = []; 
+
+%Interal of both functions
+f = integral (func, 0, 1); 
+g = integral (gunc, 0, 1); 
+
+%Run from 1 to 1000 sample size
+for i = 1:1000
+    
+    %Assign Random Variables
+    r = rand(1, i);
+    v = rand (1, i);
+
+    %Monte carlo estimator doing 1/n (sigma from i = 1 to n of f(Xi)) for
+    %entire sample size
+    u1(i) = mean (func(r)); 
+    u2(i) = mean (gunc(r)); 
+
+end
+
+%Plotting
+subplot (2, 1, 1)
+hold on
+grid on
+title ("Monte Carlo Estimator: x^2")
+xlabel ('sample size (n)')
+plot (n, u1, 'r', 'LineWidth', 3); 
+plot (n, f, '-x');
+legend ("Monte Carlo estimate", "Intergral of x^2")
+
+subplot (2, 1, 2)
+hold on
+grid on
+title ("Monte Carlo Estimator: cos(pi*x)")
+xlabel ('sample size (n)')
+plot(n, u2, 'k'); 
+plot (n, g, '-o'); 
+legend ("Monte Carlo estimate", "Intergral of cos(pi*x)")
+hold off 
+grid off
+
