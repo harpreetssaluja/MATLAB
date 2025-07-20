@@ -1,0 +1,72 @@
+clc;
+
+E = 210;
+A = 19.5;
+b1 = 90;
+b2 = 180;
+b3 = 126.9;
+b4 = 180;
+b5 = 126.9;
+l1 = 4;
+l2 = 3;
+l3 = 5;
+l4 = 6;
+l5 = 5;
+
+c1 = cosd(b1); 
+s1 = sind(b1);
+c2 = cosd(b2); 
+s2 = sind(b2);
+c3 = cosd(b3); 
+s3 = sind(b3);
+c4 = cosd(b4); 
+s4 = sind(b4);
+c5 = cosd(b5); 
+s5 = sind(b5);
+
+sel1 = (1/l1) * [c1^2, c1*s1, -c1^2, -c1*s1; c1*s1, s1^2, -c1*s1, -s1^2; -c1^2, -c1*s1, c1^2, c1*s1; -c1*s1, -s1^2, c1*s1, s1^2];
+sel2 = (1/l2) * [c2^2, c2*s2, -c2^2, -c2*s2; c2*s2, s2^2, -c2*s2, -s2^2; -c2^2, -c2*s2, c2^2, c2*s2; -c2*s2, -s2^2, c2*s2, s2^2];
+sel3 = (1/l3) * [c3^2, c3*s3, -c3^2, -c3*s3; c3*s3, s3^2, -c3*s3, -s3^2; -c3^2, -c3*s3, c3^2, c3*s3; -c3*s3, -s3^2, c3*s3, s3^2];
+sel4 = (1/l4) * [c4^2, c4*s4, -c4^2, -c4*s4; c4*s4, s4^2, -c4*s4, -s4^2; -c4^2, -c4*s4, c4^2, c4*s4; -c4*s4, -s4^2, c4*s4, s4^2];
+sel5 = (1/l5) * [c5^2, c5*s5, -c5^2, -c5*s5; c5*s5, s5^2, -c5*s5, -s5^2; -c5^2, -c5*s5, c5^2, c5*s5; -c5*s5, -s5^2, c5*s5, s5^2];
+
+N = 8;
+
+B = zeros(N, N);
+for i = 1:4
+    for j = 1:4
+        B(i+1, j+1) = B(i+1, j+1) + sel1(i, j); 
+    end
+end
+
+C = zeros(N, N);
+for i = 1:4
+    for j = 1:4 
+        C(i, j) = C(i, j) + sel2(i, j); 
+    end
+end
+
+D = zeros(N, N);
+for i = 1:4
+    for j = 1:4
+        D(i+2, j+2) = D(i+2, j+2) + sel3(i, j); 
+    end
+end
+
+G = zeros(N, N);
+for i = 1:4
+    for j = 1:4
+        G(i+3, j+3) = G(i+3, j+3) + sel4(i, j); 
+    end
+end
+
+H = zeros(N, N);
+for i = 1:4
+    for j = 1:4
+        H(i+4, j+4) = H(i+4, j+4) + sel5(i, j); 
+    end
+end
+
+F = B + C + D + G + H;
+
+
