@@ -1,0 +1,227 @@
+%Awakens
+function f = awakens(R,C,r,c)
+    neighbors = 0;
+    for i = 1:length(R)
+        a = R(i); b = C(i);
+
+        %If cell is alive, it cannot awaken
+        if a == r && b == c
+            f = false;
+            return;
+        end
+        
+        %Determine number of neighbors
+        if (a==r) && ((b==c+1) || (b==c-1))
+            neighbors = neighbors + 1;
+        elseif (a==r+1) && ((b==c-1) || (b==c+1) || (b==c))
+            neighbors = neighbors + 1;
+        elseif (a==r-1) && ((b==c-1) || (b==c+1) || (b==c))
+            neighbors = neighbors + 1;
+        end
+
+    end
+
+    f = neighbors == 3;
+    
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Live
+function f = live(R,C,r,c)
+    neighbors = 0;
+    for i = 1:length(R)
+        a = R(i); b = C(i);
+
+        %If cell is alive, it cannot awaken
+        if a == r && b == c
+            f = false;
+            return;
+        end
+        
+        %Determine number of neighbors
+        if (a==r) && ((b==c+1) || (b==c-1))
+            neighbors = neighbors + 1;
+        elseif (a==r+1) && ((b==c-1) || (b==c+1) || (b==c))
+            neighbors = neighbors + 1;
+        elseif (a==r-1) && ((b==c-1) || (b==c+1) || (b==c))
+            neighbors = neighbors + 1;
+        end
+
+    end
+
+    f = neighbors == 3;
+    
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%drawCells
+function drawCells(m,n)
+[X,Y]=meshgrid(1:m+1,1:n+1);
+hold on;
+set(gca,'DataAspectRatio',[1 1 1])
+plot(X,Y,'color',[0,0,0]+.8, 'LineWidth', 2);
+plot(Y,X,'color',[0,0,0]+.8, 'LineWidth', 2);axis off
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%inputLiveCells
+function [R,C] = inputLiveCells(m,n)
+R = []; C = [];
+%grabs current figure
+ax = gca;
+ax.Title.String = 'Click on the cells you wish to make live. Please press <Enter> when done.';
+while true
+    [x,y,click] = ginput(1);
+
+    %exit loop when enter is pressed
+    if isempty(x) || (click(1)==13)
+        break;
+    elseif (click(1)~=1)
+        continue;
+    end
+
+    %checks if square is inside grid
+    if (x < 1) || (y < 1) || (x > m + 1) || (y > n + 1)
+        continue;
+    end
+
+    R(end+1) = floor(y);
+    C(end+1) = floor(x);
+    fillCell(floor(y),floor(x));
+end
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%evolve cells
+function [Rnew,Cnew] = evolveCells(R,C,m,n)
+
+    Rnew = R;
+    Cnew = C;
+
+    %get newly awakened cells
+    [Rwake,Cwake] = getAwakenedCells(R,C,m,n);
+
+    %Find neighbors for each cell, determine which are dead
+    neighbors = getNeighbors(R,C,R,C);
+    dead = neighbors < 2 | neighbors > 3;
+
+    % remove entries which are dead
+    Rnew(dead) = [];
+    Cnew(dead) = [];
+    
+    %Merge awakened cells into surviving cells
+    [Rnew,Cnew] = mergeNewCells(Rnew,Cnew,Rwake,Cwake);
+    
+    updateCellFig(Rnew,Cnew,m,n);
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%merge new cells
+function [Rnew,Cnew] = mergeNewCells(Rnew,Cnew,Rwake,Cwake)
+    %adds each element in the Rwake and Cwake if they are not already in
+    %Rnew/Cnew
+
+    for i = 1:length(Rwake)
+        repeat = false;
+
+        %Check for repeats, short circuit if one is found
+        for j = 1:length(Rnew)
+            if Rnew(j) == Rwake(i) && Cnew(j) == Cwake(i)
+                repeat = true;
+                break;
+            end
+        end
+        if repeat
+            %move on to next entry
+            continue;
+        end
+        
+        Rnew = [Rnew,Rwake(i)];
+        Cnew = [Cnew,Cwake(i)];
+
+    end
+
+
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%fill cells
+function fillCell(r, c)
+
+    rectangle('Position', [c r 1 1], 'FaceColor', 'black', 'EdgeColor', '[.8 .8 .8]', 'LineWidth', 2);
+
+end 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%decompose
+function [LU,o,er] = decompose(a,n,tol,o,s)
+%constructs the LU decomposition of the matrix a
+% INPUTS
+%   a: nxn matrix to be decomposed
+%   n: number of rows in a
+%   tol: numerical tolerance before a pivot should register as 0
+%   o: nx1 vector containing the ordering of the pivots
+%   s: nx1 vector containing the order of pivots
+% OUTPUTS
+%   LU: decomposed a matrix
+%   er: error flag that is set to -1 when decomposition fails
+er = 0; % initialize error flag to 0
+% populate the vector s with the largest magnitude element in each row
+% and initially populate o with elements corresponding to the index i
+for i = 1:n
+    o(i) = i;
+    s(i) = abs(a(i,1));
+    for j = 2:n
+        if abs(a(i,j))>s(i)
+            s(i) = abs(a(i,j));
+        end
+    end
+end
+% iterate through all but the last row
+for k = 1:n-1
+    o = pivot(a,o,s,n,k); % figure out which row to pivot from next
+    if abs(a(o(k),k)/s(o(k)))<tol % check if the pivot is 0 and raise
+                                  % error flag if so
+        er = -1;
+        diplay(a(o(k),k)/s(o(k)));
+        break
+1
+    end
+    for i = k+1:n %for every row underneath the pivot row
+        factor = a(o(i),k)/a(o(k),k); %compute the factor for the row
+        a(o(i),k) = factor; % store the factor
+        for j = k+1:n %iterate through every column in row
+            a(o(i),j) = a(o(i),j)-factor*a(o(k),j); %adjust element value
+        end
+    end
+end
+if abs(a(o(k),k)/s(o(k)))<tol % do one last check to make sure the
+                              % final element in the upper diagonal
+                              % matrix is not effectively 0
+    er = -1;
+    diplay(a(o(k),k)/s(o(k)))
+end
+LU = a; %set up the LU matrix for output
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%GAME of LIFE
+clear all; clc; close all
+
+m = 21; %number of rows of cells
+n = 21; %number of columns of cells
+
+figure %open figure window
+drawCells(m,n) %Draw cells (all dead, i.e., white)
+[R,C] = inputLiveCells(m,n); %Populate R and C arrays with subscripts of selected live cells and color live cells black in the figure window
+
+%Evolve pattern indefinitely
+[Rnew, Cnew] = evolveCells(R,C,m,n); %get pattern after the first tick
+while ~isequal([R; C],[Rnew; Cnew]) %as long as pattern is changing following a tick
+    R = Rnew; C = Cnew; %pass updated information through
+    [Rnew, Cnew] = evolveCells(R,C,m,n); %obtain new pattern after one tick
+    pause(0.3)
+end
+title('Still Life')
+
