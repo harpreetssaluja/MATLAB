@@ -1,0 +1,92 @@
+clc; 
+%Noting down all functions 
+v = 0:150;
+z = 180:300;
+x = 150:180; 
+y = 300:360; 
+t = 0:360;
+
+PRd = 25*(10/150^3*(v).^3-15/150^4*(v).^4+6/150^5*(v).^5);
+PRv = 25*((((30*104.7)/((150).^3))*(v).^2)-(((60*104.7)/((150).^4))*(v).^3)+(((30*104.7)/((150).^5))*(v).^4));
+PRa = 25*((((60*((104.7).^2))/((150).^3))*(v))-(((180*((104.7).^2))/((150).^4))*(v).^2)+(((120*((104.7).^2))/((150).^5))*(v).^3));
+PRp = atand((PRv/104.7)./(45+PRd));
+
+D1d = []; D1v= []; D1c = [];
+D1d (1:31) = 25;
+D1v (1:31) = 0; 
+D1a (1:31) = 0; 
+
+CFd= -25 * ((z - 180) / 120 - (1 / (2 * pi)) * sin((2 * pi * (z - 180)) / 120)) + 25;
+CFv = -25 * (104.7 / 120) * (1 - cos((2 * pi * (z - 180)) / 120));
+CFa = -2 * 25 * pi * (104.7 / 120)^2 * sin((2 * pi * (z - 180)) / 120);
+CFp = atand((CFv/104.7)./(45+CFd));
+
+D2d = []; D2v= []; D2c = [];
+D2d(1:61) = 0; 
+D2v(1:61) = 0; 
+D2a(1:61) = 0; 
+
+%%%%%%%%%
+pitchx = cosd(t) .* 70;
+pitchy = sind(t) .* 70; 
+
+camx = pitchx - 10*cosd(t-(pi/180));
+camy = pitchy - 10*sind(t-(pi/180));
+
+primex = cosd(t) * 45;
+primey = sind(t) * 45;
+
+basex = cosd(t) * 35;
+basey = sind(t) * 35; 
+
+
+% subplot (3, 1, 1)
+% hold on
+% plot (v, PRd); 
+% plot (x, D1d); 
+% plot (z, CFd); 
+% plot (y, D2d); 
+% title('Displacement')
+% xlabel ('degrees')
+% legend ('Polynomial Rise', 'Dwell', 'Cycloidal Fall', 'Dwell')
+% hold off
+% 
+% subplot (3, 1, 2)
+% hold on
+% plot (v, PRv); 
+% plot (x, D1v); 
+% plot (z, CFv); 
+% plot (y, D2v); 
+% title('Velocity')
+% xlabel ('degrees')
+% hold off
+% 
+% subplot (3, 1, 3)
+% hold on
+% plot (v, PRa); 
+% plot (x, D1a); 
+% plot (z, CFa); 
+% plot (y, D2a); 
+% title('Acceleration')
+% xlabel ('degrees')
+% hold off
+%%%%%%%%%%%%%%%%%%%%
+
+% hold on
+% plot (v, PRp); 
+% plot (x, D1a); 
+% plot (z, CFp); 
+% plot (y, D2a); 
+% hold off
+% legend ('Polynomial Rise', 'Dwell', 'Cycloidal Fall', 'Dwell')
+% xlabel ('degrees')
+% ylabel ('degrees')
+% title ('Pressure angle')
+
+hold on
+plot(pitchx, pitchy); 
+plot(camx, camy);
+plot (primex, primey); 
+plot (basex, basey); 
+legend ('Pitch Curve', 'Countour Cam', 'Prime Circle', 'Base Circle')
+hold off
